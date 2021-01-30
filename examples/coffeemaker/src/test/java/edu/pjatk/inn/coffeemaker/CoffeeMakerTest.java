@@ -1,5 +1,6 @@
 package edu.pjatk.inn.coffeemaker;
 
+import com.sun.tools.javac.util.List;
 import edu.pjatk.inn.coffeemaker.impl.CoffeeMaker;
 import edu.pjatk.inn.coffeemaker.impl.Inventory;
 import edu.pjatk.inn.coffeemaker.impl.Recipe;
@@ -13,11 +14,15 @@ import org.sorcer.test.SorcerTestRunner;
 import sorcer.service.ContextException;
 import sorcer.service.Routine;
 
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static sorcer.eo.operator.*;
 import static sorcer.so.operator.eval;
 import static sorcer.so.operator.exec;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mike Sobolewski
@@ -123,5 +128,111 @@ public class CoffeeMakerTest {
 		assertEquals(coffeeMaker.makeCoffee(espresso, 200), 150);
 	}
 
+
+    @Test
+    public void addRecipe () throws Exception {
+        coffeeMaker.addRecipe(espresso);
+        assertEquals(
+            espresso.getName(),
+            coffeeMaker.getRecipeForName(
+                espresso.getName()
+            ).getName()
+        );
+    }
+
+	@Test
+    public void deleteRecipe () {
+	    boolean added = coffeeMaker.addRecipe(espresso);
+        assertTrue(added);
+	    boolean removed = coffeeMaker.deleteRecipe(espresso);
+	    assertTrue(removed);
+    }
+
+    @Test
+    public void deleteRecipes () {
+	    List<Recipe> recipes = List.of(
+            espresso,
+            macchiato,
+            americano
+        );
+
+	    recipes.forEach(coffeeMaker::addRecipe);
+
+        assertTrue(coffeeMaker.deleteRecipes());
+
+        recipes.forEach(r -> assertNull(
+            coffeeMaker.getRecipeForName(r.getName()))
+        );
+    }
+
+    @Test
+    public void editRecipe () throws Exception {
+        coffeeMaker.addRecipe(espresso);
+        coffeeMaker.editRecipe(espresso, macchiato);
+
+        Recipe oldRecipe = coffeeMaker.getRecipeForName(espresso.getName());
+        Recipe newRecipe = coffeeMaker.getRecipeForName(macchiato.getName());
+
+        assertNull(oldRecipe);
+        assertEquals(newRecipe.getName(), macchiato.getName());
+    }
+
+    @Test
+    public void addInventory () throws Exception {
+        coffeeMaker.addInventory(10, 10, 10, 10);
+
+        Inventory inventory = coffeeMaker.checkInventory();
+
+        assertEquals(inventory.getCoffee(), 25);
+        assertEquals(inventory.getMilk(), 25);
+        assertEquals(inventory.getSugar(), 25);
+        assertEquals(inventory.getChocolate(), 25);
+    }
+
+    @Test
+    public void purchaseCoffee () throws Exception {
+        coffeeMaker.addRecipe(espresso);
+
+        int change = coffeeMaker.makeCoffee(espresso,100);
+
+        Inventory inventory = coffeeMaker.checkInventory();
+
+        assertEquals(50, change);
+        assertEquals(9, inventory.getCoffee());
+        assertEquals(14, inventory.getMilk());
+        assertEquals(14, inventory.getSugar());
+        assertEquals(15, inventory.getChocolate());
+    }
+
+    @Test
+    public void negativeAmounts () throws Exception {
+        Recipe r = espresso;
+	    int neg = -1;
+
+        r.setPrice(neg);
+        r.setAmtCoffee(neg);
+        r.setAmtMilk(neg);
+        r.setAmtSugar(neg);
+        r.setAmtChocolate(neg);
+
+        assertEquals(r.getPrice(), 0);
+        assertEquals(r.getAmtCoffee(), 0);
+        assertEquals(r.getAmtMilk(), 0);
+        assertEquals(r.getAmtSugar(), 0);
+        assertEquals(r.getAmtChocolate(), 0);
+    }
+
+	@Test
+	public void maxRecipesOverflow () throws Exception {
+		boolean add1 = coffeeMaker.addRecipe(espresso);
+		boolean add2 = coffeeMaker.addRecipe(macchiato);
+		boolean add3 = coffeeMaker.addRecipe(americano);
+		boolean add4 = coffeeMaker.addRecipe(mocha);
+
+		assertTrue(add1);
+		assertTrue(add2);
+		assertTrue(add3);
+		assertFalse(add4);
+	}
 }
 

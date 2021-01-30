@@ -1,0 +1,14 @@
+CoffeeMaker 26 addRecipe()
+Incorrect requirements implementation, should add maximum 3 recipes
+
+CoffeeMaker 93 deleteRecipe()
+Variable self-assignment / Was not deleting the recipe
+
+CoffeeMaker 129 editRecipe()
+Wrong lookup recipe name used (new instead of proper old one), also recipe was not deleted correctly
+
+CoffeeMaker 152 addInventory()
+Was disallowing positive amount of sugar
+
+CoffeeMaker 188 makeCoffee()
+Adding instead of subtracting coffee
