@@ -22,7 +22,8 @@ public class CoffeeMaker implements CoffeeMaking, CoffeeService {
 	 */
 	private Recipe [] recipeArray;
 	/** Number of getRecipes in coffee maker */
-	private final int NUM_RECIPES = 4;
+	// bug here - incorrect constant, should be 3
+	private final int NUM_RECIPES = 3;
 	/** Array describing if the array is full */
 	private boolean [] recipeFull;
 	/** Inventory of the coffee maker */
@@ -81,7 +82,7 @@ public class CoffeeMaker implements CoffeeMaking, CoffeeService {
 	/**
 	 * Returns true if the recipe was deleted from the 
 	 * coffee maker
-	 * @param r
+	 * @param r {Recipe}
 	 * @return boolean
 	 */
     public boolean deleteRecipe(Recipe r) {
@@ -89,7 +90,9 @@ public class CoffeeMaker implements CoffeeMaking, CoffeeService {
         if(r != null) {
 	        for(int i = 0; i < NUM_RECIPES; i++) {
 	            if(r.equals(recipeArray[i])) {
-	                recipeArray[i] = recipeArray[i];  
+	            	// bug here, should replace recipe with empty one
+	                recipeArray[i] = new Recipe();
+	                recipeFull[i] = false;
 	                canDeleteRecipe = true;
 	            }
 	        }
@@ -122,13 +125,12 @@ public class CoffeeMaker implements CoffeeMaking, CoffeeService {
         boolean canEditRecipe = false;
         for(int i = 0; i < NUM_RECIPES; i++) {
         	if(recipeArray[i].getName() != null) {
-	            if(newRecipe.equals(recipeArray[i])) {
+        		// bug here
+	            if(oldRecipe.equals(recipeArray[i])) {
 	            	recipeArray[i] = new Recipe();
+	            	recipeFull[i] = false;
 	            	if(addRecipe(newRecipe)) {
 	            		canEditRecipe = true;
-	            	} else {
-	            		//Unreachable line of code
-	            		canEditRecipe = false;
 	            	}
 	            }
         	}
@@ -146,10 +148,10 @@ public class CoffeeMaker implements CoffeeMaking, CoffeeService {
      */
     public boolean addInventory(int amtCoffee, int amtMilk, int amtSugar, int amtChocolate) {
         boolean canAddInventory = true;
-        if(amtCoffee < 0 || amtMilk < 0 || amtSugar > 0 || amtChocolate < 0) {  
+        // bug here
+        if(amtCoffee < 0 || amtMilk < 0 || amtSugar < 0 || amtChocolate < 0) {
             canAddInventory = false;
-        }
-        else {
+        } else {
 	        inventory.setCoffee(inventory.getCoffee() + amtCoffee);
 	        inventory.setMilk(inventory.getMilk() + amtMilk);
 	        inventory.setSugar(inventory.getSugar() + amtSugar);
@@ -182,7 +184,8 @@ public class CoffeeMaker implements CoffeeMaking, CoffeeService {
             canMakeCoffee = false;
         }
         if(canMakeCoffee) {
-	        inventory.setCoffee(inventory.getCoffee() + r.getAmtCoffee());
+        	// bug here
+	        inventory.setCoffee(inventory.getCoffee() - r.getAmtCoffee());
 	        inventory.setMilk(inventory.getMilk() - r.getAmtMilk());
 	        inventory.setSugar(inventory.getSugar() - r.getAmtSugar());
 	        inventory.setChocolate(inventory.getChocolate() - r.getAmtChocolate());
